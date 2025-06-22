@@ -9,7 +9,7 @@ import Formularios.FrmDevoluciones;
 import Formularios.FrmEmpleados;
 import Formularios.FrmMarcas;
 import Formularios.FrmProductos;
-import Formularios.FrmVentas;
+import Formularios.FrmAddCliente;
 import javax.swing.JFrame;
 
 
@@ -65,6 +65,7 @@ public class FrmMenu extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(new java.awt.Dimension(400, 400));
+        setPreferredSize(new java.awt.Dimension(1920, 1080));
 
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/com/pexels-ahmetyuksek-32119340.jpg"))); // NOI18N
         jLabel2.setText("jLabel2");
@@ -218,20 +219,18 @@ public class FrmMenu extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 6162, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(1837, 1837, 1837)
+                .addGap(1878, 1878, 1878)
                 .addComponent(jLabel1)
-                .addContainerGap(378, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(155, 155, 155)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 944, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 4015, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 1521, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
@@ -242,7 +241,7 @@ public class FrmMenu extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void jMenuItem12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem12ActionPerformed
-    FrmVentas Ventas = new FrmVentas();
+    FrmAddCliente Ventas = new FrmAddCliente();
     Ventas.setLocationRelativeTo(null);
     Ventas.setVisible(true);
     }//GEN-LAST:event_jMenuItem12ActionPerformed
