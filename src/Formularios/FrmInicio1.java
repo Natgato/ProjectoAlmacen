@@ -209,6 +209,16 @@ public class FrmInicio1 extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Inicio de sesión exitoso.");
                 
                 // Abrir el formulario FrmMenu y cerrar el formulario actual (LoginForm)
+                
+                    java.util.Map<String, String> props = new java.util.HashMap<>();
+    props.put("Component.arc",     "14");
+    props.put("Button.arc",        "20");
+    props.put("TextComponent.arc", "18");
+    com.formdev.flatlaf.FlatLaf.setGlobalExtraDefaults(props);
+
+    /* ===== Look & Feel ===== */
+    com.formdev.flatlaf.themes.FlatMacDarkLaf.setup();
+                
                 FrmMenu menu = new FrmMenu(); // Asumiendo que FrmMenu es el nombre de tu formulario principal
                 menu.setVisible(true);  // Muestra el formulario principal
                 this.dispose();  // Cierra el formulario de inicio de sesión
@@ -230,7 +240,13 @@ public class FrmInicio1 extends javax.swing.JFrame {
 
 
     public static void main(String args[]) {
-        // Crear y mostrar el formulario
+    java.util.Map<String, String> props = new java.util.HashMap<>();
+    props.put("Component.arc",     "14");
+    props.put("Button.arc",        "20");
+    props.put("TextComponent.arc", "18");
+    com.formdev.flatlaf.FlatLaf.setGlobalExtraDefaults(props);
+
+    /* ===== Look & Feel ===== */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 new FrmInicio1().setVisible(true);
