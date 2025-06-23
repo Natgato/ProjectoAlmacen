@@ -487,7 +487,7 @@ public String guardarCotizacion() {
 
     private void btnAgregarProductoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAgregarProductoActionPerformed
         // Lógica para abrir tu ventana de productos
-    FrmProductos frmProd = new FrmProductos(this); // PASA LA REFERENCIA
+    SeleccionProductos frmProd = new SeleccionProductos(this); // PASA LA REFERENCIA
     frmProd.setVisible(true);
     }//GEN-LAST:event_btnAgregarProductoActionPerformed
 

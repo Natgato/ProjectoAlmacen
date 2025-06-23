@@ -14,16 +14,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class FrmProductos extends javax.swing.JFrame {
+public class SeleccionProductos extends javax.swing.JFrame {
     private FrmCotizaciones frmCotizacionesRef;
 
-public FrmProductos() {
+public SeleccionProductos() {
     this.frmCotizacionesRef = null;
     initComponents();
     setLocationRelativeTo(null);
 }
     
-    public FrmProductos(FrmCotizaciones frmCotiz) {
+    public SeleccionProductos(FrmCotizaciones frmCotiz) {
         
         this.frmCotizacionesRef = frmCotiz;
         this.setUndecorated(true);
@@ -241,9 +241,8 @@ public void vaciarTablaProductos() {
                         .addComponent(jLabel1)
                         .addGap(18, 18, 18)))
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(txtBuscarProducto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(btnBuscarProducto))
+                    .addComponent(txtBuscarProducto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnBuscarProducto)
                     .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -372,7 +371,7 @@ public void vaciarTablaProductos() {
     com.formdev.flatlaf.themes.FlatMacDarkLaf.setup();
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new FrmProductos().setVisible(true);
+                new SeleccionProductos().setVisible(true);
             }
         });
     }
