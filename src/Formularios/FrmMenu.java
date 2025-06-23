@@ -220,7 +220,17 @@ public class FrmMenu extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuItem9ActionPerformed
 
     private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
+    java.util.Map<String, String> props = new java.util.HashMap<>();
+    props.put("Component.arc",     "14");
+    props.put("Button.arc",        "20");
+    props.put("TextComponent.arc", "18");
+    com.formdev.flatlaf.FlatLaf.setGlobalExtraDefaults(props);
 
+    /* ===== Look & Feel ===== */
+    com.formdev.flatlaf.themes.FlatMacDarkLaf.setup();
+        FrmProveedores Proveedores = new FrmProveedores();
+        Proveedores.setLocationRelativeTo(null);
+        Proveedores.setVisible(true);
     }//GEN-LAST:event_jMenuItem8ActionPerformed
 
     private void jMenuItem10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem10ActionPerformed
