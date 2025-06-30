@@ -74,7 +74,8 @@ public void verDatosProductos() {
                 rs.getString("Id"),
                 rs.getString("descripcion"),
                 rs.getString("PrecioUnitario"),
-                rs.getString("UnidadMedida")
+                rs.getString("UnidadMedida"),
+                rs.getString("Stock")
             };
             modelo.addRow(fila);
         }
