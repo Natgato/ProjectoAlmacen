@@ -49,16 +49,19 @@ public class FrmCotizaciones extends javax.swing.JFrame {
     // Solo la columna 2 ("Cantidad") es editable
     @Override
     public boolean isCellEditable(int row, int column) {
-        return column == 2;
+        return column == 2|| column == 3|| column == 1;
     }
+    
+    
 });
 
         
         txtFecha.setText(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
-        tablaDetalle.getModel().addTableModelListener(e -> {
-    if (e.getColumn() == 2) { // Si cambió la columna cantidad
-        int row = e.getFirstRow();
-        DefaultTableModel modelo = (DefaultTableModel) tablaDetalle.getModel();
+tablaDetalle.getModel().addTableModelListener(e -> {
+    int row = e.getFirstRow();
+    int column = e.getColumn();
+    DefaultTableModel modelo = (DefaultTableModel) tablaDetalle.getModel();
+    if (column == 2 || column == 3|| column == 1) { // Si se editó cantidad o precio unitario
         try {
             int cantidad = Integer.parseInt(modelo.getValueAt(row, 2).toString());
             double precioUnitario = Double.parseDouble(modelo.getValueAt(row, 3).toString());
@@ -66,9 +69,8 @@ public class FrmCotizaciones extends javax.swing.JFrame {
             modelo.setValueAt(nuevoImporte, row, 4);
             actualizarTotal();
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Cantidad inválida", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Valor inválido en cantidad o precio.", "Error", JOptionPane.ERROR_MESSAGE);
             // Opcional: restaurar valor anterior o dejar 1
-            modelo.setValueAt(1, row, 2);
         }
     }
 });
@@ -123,89 +125,6 @@ public void agregarProductoDetalle(String codigo, String descripcion, double pre
 }
 
 
-
-private void exportarCotizacionPDF() {
-    JFileChooser fileChooser = new JFileChooser();
-    fileChooser.setDialogTitle("Guardar Cotización como PDF");
-    fileChooser.setSelectedFile(new File("Cotizacion_" + txtNroCotizacion.getText() + ".pdf"));
-
-    int userSelection = fileChooser.showSaveDialog(this);
-    if (userSelection != JFileChooser.APPROVE_OPTION) return;
-
-    File fileToSave = fileChooser.getSelectedFile();
-
-    Document doc = new Document(PageSize.A4, 40, 40, 40, 40);
-    try {
-        PdfWriter.getInstance(doc, new FileOutputStream(fileToSave));
-        doc.open();
-
-        // Logo (opcional, si tienes un PNG/JPG en tu carpeta images)
-        // try { Image logo = Image.getInstance("images/logo.png");
-        //       logo.scaleToFit(70, 70); doc.add(logo); } catch (Exception e) {}
-
-        
-        
-        // Título y cabecera
-        Font fontTitulo = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.DARK_GRAY);
-        Font fontSubtitulo = new Font(Font.FontFamily.HELVETICA, 13, Font.BOLD, BaseColor.BLACK);
-        Font fontNormal = new Font(Font.FontFamily.HELVETICA, 11, Font.NORMAL, BaseColor.BLACK);
-
-        Paragraph titulo = new Paragraph("FERRETERÍA VIRGEN DEL ROSARIO\n\n", fontTitulo);
-        titulo.setAlignment(Element.ALIGN_CENTER);
-        doc.add(titulo);
-
-        String correlativo = "C" + String.format("%04d", Integer.parseInt(txtNroCotizacion.getText()))
-                          + " - " + txtFecha.getText();
-        Paragraph sub = new Paragraph("COTIZACIÓN N°: " + correlativo + "\n\n", fontSubtitulo);
-        sub.setAlignment(Element.ALIGN_CENTER);
-        doc.add(sub);
-
-        doc.add(new Paragraph("Fecha: " + txtFecha.getText(), fontNormal));
-        doc.add(new Paragraph("Cliente: " + txtCliente.getText(), fontNormal));
-        doc.add(new Paragraph("\n"));
-
-        // Tabla de productos
-        PdfPTable tabla = new PdfPTable(5);
-        tabla.setWidthPercentage(100);
-        tabla.setWidths(new int[] { 14, 40, 10, 18, 18 });
-        tabla.addCell(getCell("Código", fontSubtitulo, BaseColor.LIGHT_GRAY));
-        tabla.addCell(getCell("Descripción", fontSubtitulo, BaseColor.LIGHT_GRAY));
-        tabla.addCell(getCell("Cantidad", fontSubtitulo, BaseColor.LIGHT_GRAY));
-        tabla.addCell(getCell("Precio Unitario", fontSubtitulo, BaseColor.LIGHT_GRAY));
-        tabla.addCell(getCell("Importe", fontSubtitulo, BaseColor.LIGHT_GRAY));
-
-        DefaultTableModel modelo = (DefaultTableModel) tablaDetalle.getModel();
-        for (int i = 0; i < modelo.getRowCount(); i++) {
-            tabla.addCell(getCell(modelo.getValueAt(i, 0).toString(), fontNormal, BaseColor.WHITE));
-            tabla.addCell(getCell(modelo.getValueAt(i, 1).toString(), fontNormal, BaseColor.WHITE));
-            tabla.addCell(getCell(modelo.getValueAt(i, 2).toString(), fontNormal, BaseColor.WHITE));
-            tabla.addCell(getCell(modelo.getValueAt(i, 3).toString(), fontNormal, BaseColor.WHITE));
-            tabla.addCell(getCell(modelo.getValueAt(i, 4).toString(), fontNormal, BaseColor.WHITE));
-        }
-        doc.add(tabla);
-
-        // Total grande y claro
-        Paragraph total = new Paragraph("\nTOTAL: S/ " + lblTotal.getText(), new Font(Font.FontFamily.HELVETICA, 13, Font.BOLD, BaseColor.BLUE));
-        total.setAlignment(Element.ALIGN_RIGHT);
-        doc.add(total);
-
-        // Pie de página bonito
-        Paragraph pie = new Paragraph("\nGracias por su preferencia.\nFerretería Virgen del Rosario", new Font(Font.FontFamily.HELVETICA, 11, Font.ITALIC, BaseColor.GRAY));
-        pie.setAlignment(Element.ALIGN_CENTER);
-        doc.add(pie);
-
-        doc.close();
-        JOptionPane.showMessageDialog(this, "PDF generado correctamente:\n" + fileToSave.getAbsolutePath());
-        // Opcional: abrir el archivo automáticamente
-        // java.awt.Desktop.getDesktop().open(fileToSave);
-    } catch (DocumentException e) {
-        JOptionPane.showMessageDialog(this, "Error PDF: " + e.getMessage());
-    } catch (Exception e) {
-        JOptionPane.showMessageDialog(this, "Error al exportar: " + e.getMessage());
-    }
-    }
-
-
 // Celda con estilo
 private PdfPCell getCell(String text, Font font, BaseColor bg) {
     PdfPCell cell = new PdfPCell(new Phrase(text, font));
@@ -234,6 +153,7 @@ public void exportarCotizacionAPDF(String nroCotizacion) {
         doc.add(new Paragraph("Cotización N°: " + nroCotizacion));
         doc.add(new Paragraph("Cliente: " + txtCliente.getText()));
         doc.add(new Paragraph("Fecha: " + txtFecha.getText()));
+        doc.add(new Paragraph("Dias de Validez: " + txtValidezDias.getText()));
         doc.add(new Paragraph(" "));
 
         PdfPTable table = new PdfPTable(5);
@@ -455,6 +375,11 @@ public String guardarCotizacion() {
             }
         });
 
+        txtValidezDias.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtValidezDiasActionPerformed(evt);
+            }
+        });
         txtValidezDias.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 txtValidezDiasKeyTyped(evt);
@@ -720,6 +645,10 @@ dispose();
     private void txtClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtClienteActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtClienteActionPerformed
+
+    private void txtValidezDiasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtValidezDiasActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtValidezDiasActionPerformed
 
 
     public static void main(String args[]) {
