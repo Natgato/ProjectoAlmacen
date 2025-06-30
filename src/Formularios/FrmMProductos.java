@@ -34,11 +34,12 @@ public class FrmMProductos extends javax.swing.JFrame {
         this.TxtUnidadMedida.setText("");
         this.TxtPrecio.setText("");
         this.TxtIdProducto.setText("");
+        this.txtStock.setText(""); // Limpia el campo de stock
  }
 
      public void vaciarTabla(){
         DefaultTableModel Modelo = (DefaultTableModel) jTable1.getModel();
-        String titulos[] = {"CODIGO","DESCRIPCION","PRECIO","UNIDAD DE MEDIDA"};
+        String titulos[] = {"Id","Descripcion","Precio","Unidad de Medida","Stock"};
         Modelo = new DefaultTableModel(null,titulos);
         jTable1.setModel(Modelo);
  }
@@ -57,15 +58,17 @@ public class FrmMProductos extends javax.swing.JFrame {
         dts[0] = rs.getString("Id");
         dts[1] = rs.getString("descripcion");
         dts[2] = rs.getString("PrecioUnitario");
-        dts[3] = rs.getString("UNidadMedida");
+        dts[3] = rs.getString("UnidadMedida");
+        dts[4] = rs.getString("Stock");
         miModelo.addRow(dts);
         }
         jTable1.setModel(miModelo);
-        } catch (SQLException e) {
+    } catch (SQLException e) {
         JOptionPane.showMessageDialog(null, "NO SE PUEDEN VISUALIZAR LOS DATOS DE LA TABLA PRODUCTOS", "Error",
-       JOptionPane.ERROR_MESSAGE);
-        }
-        } 
+            JOptionPane.ERROR_MESSAGE);
+    }
+}
+
     
     
     
@@ -90,6 +93,8 @@ public class FrmMProductos extends javax.swing.JFrame {
         BtnModificar = new javax.swing.JButton();
         BtnEliminar = new javax.swing.JButton();
         jButton5 = new javax.swing.JButton();
+        jLabel6 = new javax.swing.JLabel();
+        txtStock = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -116,7 +121,7 @@ public class FrmMProductos extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Codigo", "Descripcion", "Precio Unitario", "Unidad de Medida"
+                "Codigo", "Descripcion", "Precio Unitario", "Unidad de Medida", "Stock"
             }
         ));
         jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -161,6 +166,8 @@ public class FrmMProductos extends javax.swing.JFrame {
             }
         });
 
+        jLabel6.setText("Stock:");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -187,7 +194,12 @@ public class FrmMProductos extends javax.swing.JFrame {
                         .addGap(25, 25, 25)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(TxtDescripcion, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(TxtIdProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(TxtIdProducto, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(187, 187, 187)
+                                .addComponent(jLabel6)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, 143, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(TxtPrecio, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(TxtUnidadMedida, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 745, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -202,7 +214,9 @@ public class FrmMProductos extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
-                    .addComponent(TxtIdProducto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(TxtIdProducto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6)
+                    .addComponent(txtStock, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
@@ -267,11 +281,12 @@ public class FrmMProductos extends javax.swing.JFrame {
             Conectar conect = new Conectar(); 
             con = conect.getConexion(); 
 
-            String sql = "insert into TProductos(descripcion,PrecioUnitario,UnidadMedida) values (?,?,?)"; 
+            String sql = "insert into TProductos(descripcion,PrecioUnitario,UnidadMedida,Stock) values (?,?,?,?)"; 
             PreparedStatement pst = con.prepareStatement(sql); 
             pst.setString(1, this.TxtDescripcion.getText()); 
             pst.setString(2, this.TxtPrecio.getText()); 
             pst.setString(3, this.TxtUnidadMedida.getText()); 
+            pst.setString(4, this.txtStock.getText()); 
 
             int n = pst.executeUpdate(); 
             if (n > 0) {
@@ -303,6 +318,8 @@ public class FrmMProductos extends javax.swing.JFrame {
         pst.setString(2, this.TxtPrecio.getText()); 
         pst.setString(3, this.TxtUnidadMedida.getText()); 
         pst.setInt(4, Integer.parseInt(this.TxtIdProducto.getText())); 
+        pst.setInt(5, Integer.parseInt(txtStock.getText())); // Captura el stock desde el campo
+        
 
         int n = pst.executeUpdate(); 
         if (n > 0) {
@@ -354,6 +371,7 @@ try {
     this.TxtDescripcion.setText(jTable1.getValueAt(fila, 1).toString());
     this.TxtPrecio.setText(jTable1.getValueAt(fila, 2).toString());
     this.TxtUnidadMedida.setText(jTable1.getValueAt(fila, 3).toString());
+        this.txtStock.setText(jTable1.getValueAt(fila, 4).toString());
 } catch (Exception ex) {
     System.out.println("ERROR AL SELECCIONAR UN PRODUCTO : " + ex.getMessage());
 }
@@ -396,8 +414,10 @@ try {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTextField txtStock;
     // End of variables declaration//GEN-END:variables
 }
