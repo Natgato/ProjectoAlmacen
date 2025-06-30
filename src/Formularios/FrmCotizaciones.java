@@ -32,8 +32,15 @@ public class FrmCotizaciones extends javax.swing.JFrame {
 
     public FrmCotizaciones() {
         initComponents();
-        txtNroCotizacion.setText("Pendiente");
-        txtNroCotizacion.setText("Pendiente"); // o "" si prefieres vacío
+        txtValidezDias.addKeyListener(new java.awt.event.KeyAdapter() {
+    public void keyTyped(java.awt.event.KeyEvent evt) {
+        char c = evt.getKeyChar();
+        if (!Character.isDigit(c)) {
+            evt.consume();
+            getToolkit().beep();
+        }
+    }});
+        txtNroCotizacion.setText(obtenerProximoNumeroCotizacion());
         lblTotal.setText("0.00");
         tablaDetalle.setModel(new javax.swing.table.DefaultTableModel(
     new Object [][] { },
@@ -86,7 +93,7 @@ private String idClienteSeleccionado;
 public void setCliente(String id, String nombre) {
     idClienteSeleccionado = id;
     txtCliente.setText(nombre); // txtCliente es tu campo donde muestras el nombre (no editable)
-    // (Opcional) Habilita btnGuardar si ya hay productos agregados, etc.
+    txtIdCliente.setText(id);
 }
 
 
@@ -258,28 +265,75 @@ public void exportarCotizacionAPDF(String nroCotizacion) {
 }
 }
 
+public String obtenerProximoNumeroCotizacion() {
+    String numero = "";
+    try {
+        Connection conexion = new Conectar().getConexion();
+        Statement st = conexion.createStatement();
+        ResultSet rs = st.executeQuery("SELECT MAX(idCotizacion) FROM TCotizaciones");
+        int proximo = 1; // Si no hay registros, el primero será 1
+        if (rs.next()) {
+            proximo = rs.getInt(1) + 1;
+        }
+        // Formatea con ceros a la izquierda si quieres (ej: 0001)
+        numero = String.format("%04d", proximo);
+        conexion.close();
+    } catch (Exception e) {
+        numero = "0001"; // Valor por defecto si hay error
+    }
+    return numero;
+}
+
+
 public String guardarCotizacion() {
     try {
         // Evita guardar si ya tiene número asignado
         if (!txtNroCotizacion.getText().equals("") && !txtNroCotizacion.getText().equals("Pendiente")) {
             return txtNroCotizacion.getText();
         }
+        // Validaciones (puedes llamar aquí las mismas que en btnGuardarActionPerformed)
+        String nombreCliente = txtCliente.getText();
+        String fechaTexto = txtFecha.getText();
+        String idClienteTexto = txtIdCliente.getText();
+        String validezDiasTexto = txtValidezDias.getText();
+
+        if (idClienteTexto == null || idClienteTexto.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Debe seleccionar un cliente.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+        if (nombreCliente == null || nombreCliente.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El nombre del cliente no puede estar vacío.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+        if (fechaTexto == null || fechaTexto.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "La fecha no puede estar vacía.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+        if (validezDiasTexto == null || validezDiasTexto.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El campo 'Validez de Días' es obligatorio.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return null;
+        }
+        int idCliente = Integer.parseInt(idClienteTexto);
+        int validezDias = Integer.parseInt(validezDiasTexto);
+
         Connection conexion = new Conectar().getConexion();
-        String sql = "INSERT INTO TCotizaciones (cliente, fecha, total) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO TCotizaciones (fecha, idCliente, nombreCliente, validezDias) VALUES (?, ?, ?, ?)";
         PreparedStatement pst = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        pst.setString(1, txtCliente.getText());
-        pst.setDate(2, java.sql.Date.valueOf(
-            new SimpleDateFormat("yyyy-MM-dd").format(new SimpleDateFormat("dd/MM/yyyy").parse(txtFecha.getText()))
-        ));
-        pst.setDouble(3, Double.parseDouble(lblTotal.getText()));
+
+        java.sql.Date fechaSQL = new java.sql.Date(new SimpleDateFormat("dd/MM/yyyy").parse(fechaTexto).getTime());
+
+        pst.setDate(1, fechaSQL);
+        pst.setInt(2, idCliente);
+        pst.setString(3, nombreCliente);
+        pst.setInt(4, validezDias);
+
         int filas = pst.executeUpdate();
 
         if (filas > 0) {
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {
                 int idCotizacion = rs.getInt(1);
-                String fecha = txtFecha.getText();
-                String numeroFormateado = "C" + String.format("%04d", idCotizacion) + " - " + fecha;
+                String numeroFormateado = String.format("%04d", idCotizacion);
                 txtNroCotizacion.setText(numeroFormateado);
                 conexion.close();
                 return numeroFormateado;
@@ -315,6 +369,10 @@ public String guardarCotizacion() {
         btnCancelar = new javax.swing.JButton();
         btnClientes = new javax.swing.JButton();
         btnQuitarProducto = new javax.swing.JButton();
+        txtValidezDias = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel7 = new javax.swing.JLabel();
+        txtIdCliente = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -331,6 +389,11 @@ public String guardarCotizacion() {
         jLabel3.setText("Cliente: ");
 
         txtCliente.setEditable(false);
+        txtCliente.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtClienteActionPerformed(evt);
+            }
+        });
 
         jLabel4.setText("Fecha:");
 
@@ -392,6 +455,23 @@ public String guardarCotizacion() {
             }
         });
 
+        txtValidezDias.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                txtValidezDiasKeyTyped(evt);
+            }
+        });
+
+        jLabel1.setText("Validez dias:");
+
+        jLabel7.setText("Id Cliente:");
+
+        txtIdCliente.setEditable(false);
+        txtIdCliente.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtIdClienteActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -399,7 +479,6 @@ public String guardarCotizacion() {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(24, 24, 24)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -420,6 +499,7 @@ public String guardarCotizacion() {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnAgregarProducto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(btnQuitarProducto, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(jLabel2)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel3)
@@ -429,7 +509,13 @@ public String guardarCotizacion() {
                             .addComponent(txtFecha)
                             .addComponent(txtNroCotizacion))
                         .addGap(41, 41, 41)
-                        .addComponent(btnClientes)))
+                        .addComponent(btnClientes)
+                        .addGap(108, 108, 108)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel1)
+                            .addComponent(txtValidezDias)
+                            .addComponent(jLabel7)
+                            .addComponent(txtIdCliente, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -438,15 +524,22 @@ public String guardarCotizacion() {
                 .addGap(25, 25, 25)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jLabel3)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel1))
                 .addGap(3, 3, 3)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnClientes))
+                    .addComponent(btnClientes)
+                    .addComponent(txtValidezDias, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel4)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel7))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtIdCliente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -498,28 +591,39 @@ dispose();
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
     try {
         // Validación de campos obligatorios
-        String cliente = txtCliente.getText();
+        String nombreCliente = txtCliente.getText();
         String fechaTexto = txtFecha.getText();
-        String totalTexto = lblTotal.getText();
+        String idClienteTexto = txtIdCliente.getText();
+        String validezDiasTexto = txtValidezDias.getText();
 
-        if (cliente == null || cliente.trim().isEmpty()) {
+        if (idClienteTexto == null || idClienteTexto.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Debe seleccionar un cliente.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (nombreCliente == null || nombreCliente.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El nombre del cliente no puede estar vacío.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
         if (fechaTexto == null || fechaTexto.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "La fecha no puede estar vacía.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (totalTexto == null || totalTexto.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El total no puede estar vacío.", "Aviso", JOptionPane.WARNING_MESSAGE);
+        if (validezDiasTexto == null || validezDiasTexto.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El campo 'Validez de Días' es obligatorio.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
-        double total;
+        int idCliente;
+        int validezDias;
         try {
-            total = Double.parseDouble(totalTexto);
+            idCliente = Integer.parseInt(idClienteTexto);
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "El total no es un número válido.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, "El id del cliente no es válido.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        try {
+            validezDias = Integer.parseInt(validezDiasTexto);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Solo se permiten números en 'Validez de Días'.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -530,10 +634,9 @@ dispose();
             return;
         }
 
-        // Insertar cotización
-        String sql = "INSERT INTO TCotizaciones (cliente, fecha, total) VALUES (?, ?, ?)";
+        // Insertar cotización SOLO con los campos que tienes en la tabla nueva
+        String sql = "INSERT INTO TCotizaciones (fecha, idCliente, nombreCliente, validezDias) VALUES (?, ?, ?, ?)";
         PreparedStatement pst = conexion.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        pst.setString(1, cliente);
 
         // Formatear la fecha para SQL
         java.sql.Date fechaSQL;
@@ -544,18 +647,18 @@ dispose();
             JOptionPane.showMessageDialog(this, "Formato de fecha inválido.", "Aviso", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        pst.setDate(2, fechaSQL);
-
-        pst.setDouble(3, total);
+        pst.setDate(1, fechaSQL);
+        pst.setInt(2, idCliente);
+        pst.setString(3, nombreCliente);
+        pst.setInt(4, validezDias);
 
         int filas = pst.executeUpdate();
-
         if (filas > 0) {
             // Obtener el id generado por Access (número de cotización)
             ResultSet rs = pst.getGeneratedKeys();
             if (rs.next()) {
                 int idCotizacion = rs.getInt(1);
-                txtNroCotizacion.setText(String.format("%04d", idCotizacion));
+                txtNroCotizacion.setText(String.valueOf(idCotizacion));
                 JOptionPane.showMessageDialog(this, "Cotización guardada con N°: " + txtNroCotizacion.getText());
             }
         } else {
@@ -606,6 +709,18 @@ dispose();
     exportarCotizacionAPDF(txtNroCotizacion.getText());
     }//GEN-LAST:event_btnImprimirActionPerformed
 
+    private void txtIdClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtIdClienteActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtIdClienteActionPerformed
+
+    private void txtValidezDiasKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtValidezDiasKeyTyped
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtValidezDiasKeyTyped
+
+    private void txtClienteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtClienteActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtClienteActionPerformed
+
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -646,17 +761,21 @@ dispose();
     private javax.swing.JButton btnGuardar;
     private javax.swing.JButton btnImprimir;
     private javax.swing.JButton btnQuitarProducto;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JLabel lblTotal;
     private javax.swing.JTable tablaDetalle;
     private javax.swing.JTextField txtCliente;
     private javax.swing.JTextField txtFecha;
+    private javax.swing.JTextField txtIdCliente;
     private javax.swing.JTextField txtNroCotizacion;
+    private javax.swing.JTextField txtValidezDias;
     // End of variables declaration//GEN-END:variables
 }
