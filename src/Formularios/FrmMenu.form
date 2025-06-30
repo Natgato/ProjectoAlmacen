@@ -94,37 +94,9 @@
             <Property name="text" type="java.lang.String" value="Reportes"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem18">
+            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem2">
               <Properties>
-                <Property name="text" type="java.lang.String" value="Ventas diarias/mensuales/anuales "/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem18ActionPerformed"/>
-              </Events>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem20">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Productos m&#xe1;s vendidos "/>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem21">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Productos con bajo stock "/>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem22">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Estado de cuentas de clientes "/>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem23">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Movimientos de inventario "/>
-              </Properties>
-            </MenuItem>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem24">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Ganancias y p&#xe9;rdidas "/>
+                <Property name="text" type="java.lang.String" value="Reporte Completo"/>
               </Properties>
             </MenuItem>
           </SubComponents>

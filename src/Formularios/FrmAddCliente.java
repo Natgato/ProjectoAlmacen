@@ -16,6 +16,7 @@ import javax.swing.event.DocumentListener;
 
 public class FrmAddCliente extends javax.swing.JFrame {
 private FrmCotizaciones frmPadre; // referencia al padre
+private FrmVentas frmMadre; // referencia al padre
 
 public FrmAddCliente() {
     initComponents();
@@ -29,6 +30,21 @@ public FrmAddCliente() {
     });
 }
 
+    public FrmAddCliente(FrmVentas Madre) {
+    this.frmMadre = Madre;
+    this.setUndecorated(true);
+    this.setUndecorated(true);
+    initComponents();
+    this.setLocationRelativeTo(null);
+    vaciarTablaClientes();
+    verDatosCliente();
+    jTextField1.getDocument().addDocumentListener(new DocumentListener() {
+        public void insertUpdate(DocumentEvent e) { buscarClientesTiempoReal(); }
+        public void removeUpdate(DocumentEvent e) { buscarClientesTiempoReal(); }
+        public void changedUpdate(DocumentEvent e) { buscarClientesTiempoReal(); }
+});
+            
+    }
 
     public FrmAddCliente(FrmCotizaciones padre) {
     this.frmPadre = padre;
@@ -361,7 +377,12 @@ public void verDatosCliente() {
     // Manda el cliente al formulario padre
     if (frmPadre != null) {
         frmPadre.setCliente(idCliente, nombreCompleto);
+        
     }
+    else if (frmMadre != null) {
+    // Si el formulario madre es FrmVentas
+    frmMadre.setCliente(idCliente, nombreCompleto);
+}
     this.dispose(); // Cierra la ventana de clientes
     }//GEN-LAST:event_btnSeleccionarActionPerformed
 

@@ -16,14 +16,16 @@ import java.sql.SQLException;
 
 public class SeleccionProductos extends javax.swing.JFrame {
     private FrmCotizaciones frmCotizacionesRef;
+    private FrmVentas frmVentasRef;
 
 public SeleccionProductos() {
     this.frmCotizacionesRef = null;
+    this.frmVentasRef = null;
     initComponents();
     setLocationRelativeTo(null);
 }
     
-    public SeleccionProductos(FrmCotizaciones frmCotiz) {
+    public SeleccionProductos(FrmCotizaciones  frmCotiz) {
         
         this.frmCotizacionesRef = frmCotiz;
         this.setUndecorated(true);
@@ -33,6 +35,15 @@ public SeleccionProductos() {
         vaciarTablaProductos();
     verDatosProductos(); // ← debe llamarse aquí
     }
+    
+public SeleccionProductos(FrmVentas frmVentas) {
+    this.frmVentasRef = frmVentas;
+    this.frmCotizacionesRef = null;
+    initComponents();
+    setLocationRelativeTo(null);
+    vaciarTablaProductos();
+    verDatosProductos();
+}
 
     
     public void buscarProducto() {
@@ -50,7 +61,8 @@ public SeleccionProductos() {
                     rs.getString("Id"),
                     rs.getString("descripcion"),
                     rs.getString("PrecioUnitario"),
-                    rs.getString("UnidadMedida")
+                    rs.getString("UnidadMedida"),
+                        rs.getString("Stock")
                 };
                 modelo.addRow(fila);
             }
@@ -91,6 +103,8 @@ public void vaciarTablaProductos() {
     tablaProductos.setModel(modelo);
 }
         
+
+
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -123,13 +137,13 @@ public void vaciarTablaProductos() {
 
         tablaProductos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null},
+                {null, null, null, null, null}
             },
             new String [] {
-                "Codigo", "Apellidos", "Nombres", "Direccion"
+                "Codigo", "Apellidos", "Nombres", "Direccion", "Stock"
             }
         ));
         tablaProductos.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -326,36 +340,25 @@ public void vaciarTablaProductos() {
         return;
     }
 
-    Object objCodigo      = tablaProductos.getValueAt(fila, 0);
-    Object objDescripcion = tablaProductos.getValueAt(fila, 1);
-    Object objPrecio      = tablaProductos.getValueAt(fila, 2);
-
-    // Validación estricta anti-null
-    if (objCodigo == null || objDescripcion == null || objPrecio == null
-        || objCodigo.toString().trim().isEmpty()
-        || objDescripcion.toString().trim().isEmpty()
-        || objPrecio.toString().trim().isEmpty()) {
-        JOptionPane.showMessageDialog(this, "El producto seleccionado tiene datos incompletos.");
-        return;
-    }
-
-    String codigo = objCodigo.toString();
-    String descripcion = objDescripcion.toString();
+    String codigo = tablaProductos.getValueAt(fila, 0).toString();
+    String descripcion = tablaProductos.getValueAt(fila, 1).toString();
     double precioUnitario;
     try {
-        precioUnitario = Double.parseDouble(objPrecio.toString());
+        precioUnitario = Double.parseDouble(tablaProductos.getValueAt(fila, 2).toString());
     } catch (NumberFormatException ex) {
         JOptionPane.showMessageDialog(this, "El precio del producto no es válido.");
         return;
     }
 
-
-    if (frmCotizacionesRef != null) {
+    if (frmVentasRef != null) {
+        frmVentasRef.agregarProductoVenta(codigo, descripcion, precioUnitario);
+    } else if (frmCotizacionesRef != null) {
         frmCotizacionesRef.agregarProductoDetalle(codigo, descripcion, precioUnitario);
     } else {
-        JOptionPane.showMessageDialog(this, "No se pudo agregar el producto. No hay una cotización activa.", "Error", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, "No se pudo agregar el producto. No hay un formulario activo.", "Error", JOptionPane.ERROR_MESSAGE);
     }
 
+ 
     dispose();
     }//GEN-LAST:event_btnSeleccionarProductoActionPerformed
 
