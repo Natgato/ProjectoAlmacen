@@ -139,6 +139,8 @@ private PdfPCell getCell(String text, Font font, BaseColor bg) {
     return cell;
 }
 
+
+
 public void exportarCotizacionAPDF(String nroCotizacion) {
     try {
         JFileChooser chooser = new JFileChooser();

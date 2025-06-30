@@ -1,6 +1,23 @@
-
 package Formularios;
+import java.sql.SQLException;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 
+import java.io.FileOutputStream;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import Conexion.Conectar;
 import Formularios.FrmMClientes;
 import Formularios.FrmMProductos;
 import Formularios.FrmCotizaciones;
@@ -10,7 +27,17 @@ import Formularios.FrmEmpleados;
 import Formularios.FrmMarcas;
 import Formularios.SeleccionProductos;
 import Formularios.FrmAddCliente;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import java.io.FileOutputStream;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class FrmMenu extends javax.swing.JFrame {
 
@@ -20,6 +47,89 @@ public class FrmMenu extends javax.swing.JFrame {
     this.setLocationRelativeTo(null); // Centrar (opcional si ya maximizas)
     this.setExtendedState(JFrame.MAXIMIZED_BOTH); // ✅ Maximizar pantalla
     }
+
+public void generarReporteTotal() {
+        try {
+            // Configuración del archivo PDF
+            JFileChooser chooser = new JFileChooser();
+            chooser.setDialogTitle("Guardar Reporte Total");
+            chooser.setSelectedFile(new java.io.File("ReporteTotal.pdf"));
+            int userSelection = chooser.showSaveDialog(null);
+
+            if (userSelection != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+
+            String rutaArchivo = chooser.getSelectedFile().getAbsolutePath();
+
+            Document doc = new Document(PageSize.A4);
+            PdfWriter.getInstance(doc, new FileOutputStream(rutaArchivo));
+            doc.open();
+
+            // Título del reporte
+            doc.add(new Paragraph("Reporte Total", FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18)));
+            doc.add(new Paragraph("Generado el: " + new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date())));
+            doc.add(new Paragraph(" "));
+
+            Connection conexion = new Conectar().getConexion();
+            if (conexion == null) {
+                JOptionPane.showMessageDialog(null, "No se pudo conectar a la base de datos.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Listas de tablas y sus columnas
+            String[][] tablasColumnas = {
+                {"TClientes", "Id", "apellidos", "nombres", "dni", "direccion"},
+                {"TCotizaciones", "IdCotizacion", "fecha", "validezDias", "Idcliente", "NOMBRECLIENTE"},
+                {"TEmpleados", "Id", "Apellidos", "Nombres", "Telefono", "NivelAcceso"},
+                {"TProductos", "Id", "descripcion", "PrecioUnitario", "UnidadMedida", "Stock"},
+                {"TProveedores", "Id", "RazonSocial", "RUC", "Direccion", "Telefono"},
+                {"TUsuarios", "Id", "usuario", "clave"},
+                {"TVentas", "IdCotizacion", "fecha", "Idcliente", "NOMBRECLIENTE"}
+            };
+
+            for (String[] tabla : tablasColumnas) {
+                String nombreTabla = tabla[0];
+                String[] columnas = new String[tabla.length - 1];
+                System.arraycopy(tabla, 1, columnas, 0, tabla.length - 1);
+
+                try (Statement stmt = conexion.createStatement();
+                     ResultSet rs = stmt.executeQuery("SELECT * FROM " + nombreTabla)) {
+
+                    // Crear tabla en el PDF
+                    doc.add(new Paragraph(nombreTabla, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 14)));
+                    PdfPTable pdfTable = new PdfPTable(columnas.length);
+                    pdfTable.setWidthPercentage(100);
+
+                    for (String columna : columnas) {
+                        pdfTable.addCell(columna);
+                    }
+
+                    while (rs.next()) {
+                        for (String columna : columnas) {
+                            pdfTable.addCell(rs.getString(columna));
+                        }
+                    }
+
+                    doc.add(pdfTable);
+                    doc.add(new Paragraph(" "));
+
+                } catch (SQLException e) {
+                    JOptionPane.showMessageDialog(null, "Error al acceder a la tabla " + nombreTabla + ": " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace();
+                }
+            }
+
+            doc.close();
+            conexion.close();
+
+            JOptionPane.showMessageDialog(null, "Reporte generado correctamente:\n" + rutaArchivo);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al generar el reporte: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            e.printStackTrace();
+        }
+    }
+
 
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -128,6 +238,11 @@ public class FrmMenu extends javax.swing.JFrame {
         jMenu4.setText("Reportes");
 
         jMenuItem2.setText("Reporte Completo");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
         jMenu4.add(jMenuItem2);
 
         jMenuBar2.add(jMenu4);
@@ -262,6 +377,15 @@ public class FrmMenu extends javax.swing.JFrame {
         Ventas.setLocationRelativeTo(null);
         Ventas.setVisible(true);
     }//GEN-LAST:event_jMenuItem12ActionPerformed
+
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+    try {
+        generarReporteTotal();
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error al generar el reporte: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        e.printStackTrace();
+    }
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
 
     /**
      * @param args the command line arguments
